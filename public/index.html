@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>FÁBRICA WEBER AL LÍMITE</title>
+<style>
+:root{--y:#FFD400;--g:#6b7078;--gd:#3a3e44;--b:#0b4f9c;--w:#fff}
+*{box-sizing:border-box;touch-action:manipulation}
+body{margin:0;font-family:system-ui,Segoe UI,Arial,sans-serif;background:var(--gd);color:var(--w);overflow-x:hidden}
+.v{display:none;min-height:100vh;padding:14px}.v.on{display:block}
+h1{font-size:2.1rem;margin:.2em 0;color:var(--y);text-shadow:3px 3px 0 #000;letter-spacing:1px}
+.cover{text-align:center;background:repeating-linear-gradient(45deg,#2c2f34 0 20px,#33373d 20px 40px)}
+.cover small{display:block;margin-top:22px;opacity:.8}
+button{font:800 1.1rem inherit;border:0;border-radius:14px;padding:16px;background:var(--y);color:#111;box-shadow:0 5px 0 #a88a00;cursor:pointer}
+button:active{transform:translateY(4px);box-shadow:0 1px 0 #a88a00}
+button.b{background:var(--b);color:#fff;box-shadow:0 5px 0 #06305e}.big{font-size:1.5rem;padding:20px 30px}
+input,select{width:100%;padding:14px;font-size:1.1rem;border-radius:10px;border:3px solid var(--y);margin:6px 0}
+canvas{width:100%;border-radius:12px;border:3px solid #000;background:#8a8f96;display:block}
+.bar{height:22px;background:#222;border-radius:11px;overflow:hidden;position:relative;margin:8px 0}
+.bar i{display:block;height:100%;background:var(--y);transition:width .15s}
+.hud{display:flex;justify-content:space-between;font-weight:800;margin:6px 0}
+.panel{background:#2a2d32;border:3px solid var(--y);border-radius:16px;padding:12px;margin-top:8px;text-align:center;transition:transform .4s}
+.rev .panel{transform:rotate(180deg)}
+.btns{display:flex;gap:10px;margin-top:10px}.btns button{flex:1}
+.zone{position:absolute;top:0;bottom:0;background:#2ecc40}.ind{position:absolute;top:-4px;width:8px;bottom:-4px;background:#fff;border:2px solid #000}
+.sack{display:inline-block;width:150px;height:100px;border-radius:12px;background:var(--y);color:#111;font-weight:900;line-height:100px;border:4px solid #a88a00;font-size:1.2rem}
+.sack.bad{background:#b5651d;border:4px dashed #5a2d00;color:#fff;transform:rotate(-6deg)}
+.slot{display:inline-block;width:46px;height:30px;margin:3px;border:2px solid #fff;border-radius:5px}.slot.f{background:var(--y)}
+.shake{animation:sh .1s infinite}@keyframes sh{50%{transform:translate(4px,-4px)}}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:9}#fx span{position:absolute;font-size:3rem;pointer-events:auto;animation:fl 3s infinite alternate ease-in-out}
+@keyframes fl{to{transform:translate(30px,40px) rotate(20deg)}}
+#smoke{position:fixed;inset:0;pointer-events:none;background:radial-gradient(#888a,#0000 70%);z-index:8;display:none}
+#mute{position:fixed;top:8px;right:8px;z-index:20;padding:8px 12px;font-size:1rem}
+#screen{background:#1d2026}.row{display:flex;gap:18px}.col{flex:1}
+.rk{display:flex;align-items:center;gap:10px;margin:6px 0;font-weight:800;font-size:1.25rem}
+.rk .bar{flex:1;height:30px;margin:0}.rk b{width:140px;overflow:hidden;white-space:nowrap}
+.al{background:var(--b);border-left:8px solid var(--y);padding:10px;margin:6px 0;font-weight:700;font-size:1.2rem;animation:fl 0.5s 1}
+#tm{font-size:4rem;font-weight:900;color:var(--y)}
+</style></head><body>
+<button id="mute" class="b">🔊</button><div id="smoke"></div><div id="fx"></div>
+
+<div class="v cover on" id="cover">
+  <h1 style="margin-top:30px">🏭 FÁBRICA WEBER<br>AL LÍMITE</h1>
+  <p>¡Fabricad palés entre todos y sabotead a las demás mesas!</p>
+  <canvas id="c0" width="360" height="180"></canvas><br><br>
+  <button class="big" id="enter">¡ENTRAR A LA FÁBRICA!</button>
+  <small>© 2026 Creado y diseñado por FerLudu · Todos los derechos reservados</small>
+</div>
+
+<div class="v" id="join"><h1>Identifícate, operario</h1>
+  <input id="nm" maxlength="18" placeholder="Tu nombre">
+  <select id="ms"></select>
+  <input id="ot" maxlength="20" placeholder="…o nombre de tu departamento (opcional)">
+  <button class="big b" id="go" style="width:100%;margin-top:10px">UNIRME A LA LÍNEA</button>
+  <p id="er" style="color:#ff7"></p></div>
+
+<div class="v" id="game">
+  <div class="hud"><span id="gm"></span><span id="gt"></span><span id="gs"></span></div>
+  <canvas id="c1" width="360" height="170"></canvas>
+  <div class="hud"><span id="gseat"></span><span id="gp"></span></div>
+  <div id="gstat" style="text-align:center;font-weight:800;color:var(--y)"></div>
+  <div id="ctl"></div>
+  <button id="sabB" class="big" style="display:none;width:100%;margin-top:10px;background:#e53935;color:#fff"></button>
+  <div id="sabM" class="btns" style="display:none;flex-direction:column"></div>
+</div>
+
+<div class="v" id="screen">
+  <div class="row"><div class="col" style="max-width:360px;text-align:center">
+    <h1 style="font-size:1.8rem">🏭 FÁBRICA WEBER AL LÍMITE</h1>
+    <img id="qr" width="320" height="320" style="background:#fff;padding:10px;border-radius:12px">
+    <div style="font-size:1.1rem;word-break:break-all" id="url"></div>
+    <div id="tm">2:00</div><div id="cnt"></div><br>
+    <button id="hs" class="big" style="width:100%">INICIAR RONDA (2 MIN)</button><br><br>
+    <button id="hb" class="b big" style="width:100%">ACTIVAR SABOTAJES</button><br><br>
+    <button id="hr" style="width:100%;background:#c33;color:#fff">REINICIAR MARCADORES</button>
+    <small style="display:block;margin-top:14px;opacity:.7">© 2026 Creado y diseñado por FerLudu · Todos los derechos reservados</small>
+  </div><div class="col"><canvas id="c2" width="700" height="220"></canvas>
+    <h2 style="color:var(--y)">🏆 TOP 10 MESAS</h2><div id="rk"></div><div id="al"></div></div></div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const $=id=>document.getElementById(id),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const SCR=location.search.includes('pantalla=1'),SEATS=['1 · DOSIFICADOR','2 · MEZCLADOR','3 · CONTROL DE CALIDAD','4 · PALETIZADOR'];
+const sock=io({transports:['websocket','polling']});
+let S={run:false,left:0,buf:{mix:0,qc:0,pal:0,on:0},fx:null,seats:{},score:0,pals:0,sabN:0,sab:false,n:'',round:0},mySeat=-1,fxOn=null;
+
+/* ---------- AUDIO ---------- */
+let AC,muted=false,step=0;
+const mel=[523,659,784,659,587,740,880,740,523,659,784,1047,988,784,659,587],bas=[131,131,196,196,147,147,220,220];
+function ac(){if(!AC){AC=new(window.AudioContext||window.webkitAudioContext)();setInterval(music,220)}if(AC.state=='suspended')AC.resume()}
+function tone(f,d,t='square',v=.05,w=0){if(!AC||muted)return;const o=AC.createOscillator(),g=AC.createGain();o.type=t;o.frequency.value=f;g.gain.setValueAtTime(v,AC.currentTime+w);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+w+d);o.connect(g);g.connect(AC.destination);o.start(AC.currentTime+w);o.stop(AC.currentTime+w+d)}
+function music(){tone(mel[step%16],.18,'triangle',.05);if(step%2==0)tone(bas[(step/2|0)%8],.4,'sawtooth',.03);if(step%4==0)tone(80,.1,'sine',.12);step++}
+const sfx={ok:()=>{tone(880,.1);tone(1320,.15,'square',.05,.08)},bad:()=>tone(120,.3,'sawtooth',.08),tap:()=>tone(500,.05,'square',.03),truck:()=>[523,659,784,1047].forEach((f,i)=>tone(f,.15,'square',.06,i*.08)),sab:()=>{tone(200,.5,'sawtooth',.08);tone(150,.5,'square',.06,.1)}};
+$('mute').onclick=()=>{ac();muted=!muted;$('mute').textContent=muted?'🔇':'🔊'};
+
+/* ---------- FÁBRICA 2.5D ---------- */
+function F(c,t,o){const x=c.getContext('2d'),W=c.width,H=c.height;x.clearRect(0,0,W,H);
+ x.fillStyle='#9aa0a8';x.fillRect(0,0,W,H);x.fillStyle='#8a8f96';for(let i=0;i<W;i+=60)x.fillRect(i,0,2,H);
+ x.fillStyle='#FFD400';x.fillRect(0,H*.1,W,6);
+ const by=H*.55,bh=H*.16,sp=o.jam?.3:(o.run?1:.2);
+ x.fillStyle='#2b2d31';x.fillRect(10,by,W-20,bh);x.fillStyle='#555';
+ for(let i=-1;i<W/20;i++)x.fillRect(10+((i*20+t*40*sp)%(W)),by+4,10,bh-8);
+ for(let k=0;k<4;k++){const sx=W*(.12+k*.22);
+  x.fillStyle='#0b4f9c';x.fillRect(sx-30,by-H*.38,60,H*.33);x.fillStyle='#FFD400';x.fillRect(sx-30,by-H*.38,60,8);
+  x.fillStyle='#fff';x.font=(H/14|0)+'px sans-serif';x.textAlign='center';x.fillText(['SILO','MEZCLA','CALIDAD','PALÉ'][k],sx,by-H*.1);
+  x.fillStyle='#e8c9a0';x.beginPath();x.arc(sx+38,by-H*.06+Math.sin(t*4+k)*2,H*.045,0,7);x.fill();
+  x.fillStyle='#FFD400';x.beginPath();x.arc(sx+38,by-H*.085+Math.sin(t*4+k)*2,H*.05,Math.PI,0);x.fill();
+  x.fillStyle='#ff9800';x.fillRect(sx+30,by-H*.03,16,H*.07)}
+ const n=6;for(let i=0;i<n;i++){const px=((t*40*sp+i*W/n)%(W-40))+10;x.fillStyle=i%5==4?'#b5651d':'#FFD400';x.fillRect(px,by+4,34,bh-8);x.strokeStyle='#a88a00';x.strokeRect(px,by+4,34,bh-8);x.fillStyle='#111';x.font='8px sans-serif';x.fillText(i%2?'webercol':'webertherm',px+17,by+bh/2+3)}
+ const py=by+bh+10;x.fillStyle='#a0703a';for(let i=0;i<4;i++)x.fillRect(W*.62+i*38,py+H*.1,34,10);
+ for(let i=0;i<(o.pal||0)%5;i++){x.fillStyle='#FFD400';x.fillRect(W*.62+i*8,py+H*.1-10-i*3,34,10)}
+ const fx_=((t*30)%(W+80))-60;x.fillStyle='#ffb300';x.fillRect(fx_,py+H*.04,40,18);x.fillStyle='#222';x.fillRect(fx_+40,py-6,4,30);x.fillRect(fx_+40,py+20,18,3);x.beginPath();x.arc(fx_+8,py+24,6,0,7);x.arc(fx_+32,py+24,6,0,7);x.fill();
+ if(o.jam){x.fillStyle='#7777';for(let i=0;i<6;i++){x.beginPath();x.arc(W*.3+i*30,by-20-((t*30+i*15)%50),14,0,7);x.fill()}}}
+let T0=0;(function loop(t){T0=t/1000;const v=document.querySelector('.v.on');if(v){if(v.id=='cover')F($('c0'),T0,{run:1});if(v.id=='game')F($('c1'),T0,{run:S.run,jam:S.fx=='jam',pal:S.buf.on});if(v.id=='screen')F($('c2'),T0,{run:RUN,jam:0,pal:3})}requestAnimationFrame(loop)})(0);
+
+/* ---------- NAVEGACIÓN ---------- */
+const show=id=>{document.querySelectorAll('.v').forEach(e=>e.classList.toggle('on',e.id==id))};
+let RUN=false;
+if(SCR){show('screen');sock.emit('screen');sock.on('connect',()=>sock.emit('screen'));
+ const u=location.origin+location.pathname;$('url').textContent=u;$('qr').src='https://api.qrserver.com/v1/create-qr-code/?size=400x400&data='+encodeURIComponent(u);
+ $('hs').onclick=()=>{ac();sock.emit('host','start')};$('hb').onclick=()=>sock.emit('host','sabotage');
+ $('hr').onclick=()=>confirm('¿Reiniciar marcadores?')&&sock.emit('host','reset');
+ sock.on('state',s=>{RUN=s.run;const m=Math.floor(s.left/60000),sc=Math.floor(s.left/1000)%60;$('tm').textContent=s.run?m+':'+String(sc).padStart(2,'0'):(s.round?'FIN':'2:00');
+  $('cnt').textContent=s.tables+' mesas · '+s.players+' conexiones · Ronda '+s.round;$('hb').textContent=s.sab?'SABOTAJES: ACTIVOS ✅':'ACTIVAR SABOTAJES';
+  const mx=Math.max(100,...s.rank.map(r=>r.s));
+  $('rk').innerHTML=s.rank.map((r,i)=>`<div class="rk"><span>${i+1}</span><b>Mesa ${esc(r.n)}</b><div class="bar"><i style="width:${r.s/mx*100}%;${r.fx?'background:#e53935':''}"></i></div><span>${r.s} · 📦${r.p}</span></div>`).join('')});
+ sock.on('alert',a=>{sfx.sab();const d=document.createElement('div');d.className='al';const n={prl:'una Inspección de PRL',jam:'un Atasco en el Silo',vip:'un Pedido Urgente VIP'}[a.type];d.textContent=`¡La Mesa ${a.from} ha lanzado ${n} a la Mesa ${a.to}!`;$('al').prepend(d);setTimeout(()=>d.remove(),7000);while($('al').children.length>4)$('al').lastChild.remove()});
+}else{
+ $('ms').innerHTML=Array.from({length:25},(_,i)=>`<option>${i+1}</option>`).join('');
+ $('enter').onclick=()=>{ac();show('join')};
+ $('go').onclick=()=>{ac();sock.emit('join',{name:$('nm').value,mesa:$('ot').value.trim()||$('ms').value})};
+ sock.on('err',e=>$('er').textContent=e);
+ sock.on('joined',()=>show('game'));
+ sock.on('over',()=>{sfx.truck()});
+ sock.on('t',s=>{const prevSeat=mySeat;S=s;mySeat=s.seats[sock.id]??-1;
+  $('gm').textContent='Mesa '+s.n;$('gs').textContent='⭐ '+s.score;$('gp').textContent='📦 '+s.pals+' palés';
+  const m=Math.floor(s.left/60000),sc=Math.floor(s.left/1000)%60;$('gt').textContent=s.run?m+':'+String(sc).padStart(2,'0'):'Esperando ronda…';
+  $('gseat').textContent='Puesto '+(SEATS[mySeat]||'—');
+  $('gstat').textContent=`Silo ${s.buf.mix} → Amasado → Calidad ${s.buf.qc} → Palé ${s.buf.pal} (+${s.buf.on}/4 en palé)`;
+  if(mySeat!==prevSeat)build();
+  document.body.classList.toggle('rev',s.fx=='vip');document.body.classList.toggle('shake',s.fx=='jam');$('smoke').style.display=s.fx=='jam'?'block':'none';
+  if(s.fx=='prl'&&fxOn!='prl')prl();if(s.fx!='prl')$('fx').innerHTML='';fxOn=s.fx;
+  const can=s.sab&&s.sabN>0&&s.run;$('sabB').style.display=can?'block':'none';$('sabB').textContent='💥 ¡SABOTAJE! ('+s.sabN+')';
+  if(!can)$('sabM').style.display='none';upd()});
+ $('sabB').onclick=()=>{$('sabM').style.display='flex'};
+ $('sabM').innerHTML=[['prl','🦺 Inspección de PRL Sorpresa'],['jam','💨 Atasco en el Silo'],['vip','📦 Pedido Urgente VIP']].map(a=>`<button data-t="${a[0]}" style="background:#e53935;color:#fff">${a[1]}</button>`).join('');
+ $('sabM').onclick=e=>{const t=e.target.dataset.t;if(t){sock.emit('sab',{type:t});sfx.sab();$('sabM').style.display='none'}};
+}
+function prl(){const f=$('fx');f.innerHTML='';for(let i=0;i<14;i++){const s=document.createElement('span');s.textContent=['⛑️','🥽','🦺'][i%3];s.style.left=Math.random()*85+'%';s.style.top=Math.random()*85+'%';s.style.animationDelay=Math.random()+'s';s.onclick=()=>{s.remove();sfx.tap()};f.appendChild(s)}}
+
+/* ---------- MINIJUEGOS ---------- */
+let ind=0,zone=[.4,.6],mixH=0,mixT=0,cur=null;
+const A=(a,good)=>{sock.emit('act',{a,good})};
+function build(){const c=$('ctl');mixH=0;mixT=0;cur=null;zone=[.25+Math.random()*.4,0];zone[1]=zone[0]+.2;
+ if(mySeat==0)c.innerHTML=`<div class="panel"><b>Pulsa en la zona verde</b><div class="bar" id="db" style="height:36px"><div class="zone" style="left:${zone[0]*100}%;width:20%"></div><div class="ind" id="ind"></div></div><button class="big" id="dB" style="width:100%">DOSIFICAR</button></div>`,$('dB').onclick=()=>{if(!S.run)return;if(ind>=zone[0]&&ind<=zone[1]){A('dose');sfx.ok()}else sfx.bad()};
+ else if(mySeat==1)c.innerHTML=`<div class="panel"><b>Homogeneidad</b><div class="bar"><i id="hm"></i></div><b>Temperatura</b><div class="bar"><i id="tp" style="background:#e53935"></i></div><button class="big b" id="mB" style="width:100%">MEZCLAR</button></div>`,$('mB').onclick=()=>{if(!S.run)return;mixH+=7;mixT+=9;sfx.tap();if(mixT>100){mixH=0;mixT=60;sfx.bad()}if(mixH>=100){A('mix');mixH=0;sfx.ok()}upd()};
+ else if(mySeat==2)c.innerHTML=`<div class="panel"><b>Toca el saco roto para descartarlo</b><br><br><div id="sk"></div><div class="btns"><button class="big" id="qB">APROBAR ✔</button></div></div>`,$('qB').onclick=()=>{if(!cur)return;A('qc',!cur.bad);cur.bad?sfx.bad():sfx.ok();cur=null;upd()},$('sk').onclick=()=>{if(!cur)return;A('qc',false);sfx.tap();cur=null;upd()};
+ else if(mySeat==3)c.innerHTML=`<div class="panel"><b>Palé</b><div id="sl"></div><div class="btns"><button class="b" id="pB">COLOCAR SACO</button><button id="tB">ENVIAR CAMIÓN 🚚</button></div></div>`,$('pB').onclick=()=>{A('place');sfx.tap()},$('tB').onclick=()=>{if(S.buf.on>=4)sfx.truck();A('truck')};
+ else c.innerHTML=''}
+function upd(){if(mySeat==1&&$('hm')){mixH=Math.max(0,mixH-.4);mixT=Math.max(0,mixT-.5);$('hm').style.width=mixH+'%';$('tp').style.width=mixT+'%'}
+ if(mySeat==2&&$('sk')){if(!cur&&S.buf.qc>0)cur={bad:Math.random()<.2};if(cur&&S.buf.qc<1)cur=null;$('sk').innerHTML=cur?`<div class="sack ${cur.bad?'bad':''}">${cur.bad?'¡ROTO!':'webercol'}</div>`:'<i>Esperando sacos…</i>'}
+ if(mySeat==3&&$('sl'))$('sl').innerHTML=[0,1,2,3].map(i=>`<span class="slot ${i<S.buf.on?'f':''}"></span>`).join('')+` <small>${S.buf.pal} listos para colocar</small>`}
+(function d(){ind=(Math.sin(Date.now()/450)+1)/2;const e=$('ind');if(e)e.style.left=ind*98+'%';requestAnimationFrame(d)})();
+</script></body></html>
